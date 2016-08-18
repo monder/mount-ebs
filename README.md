@@ -1,6 +1,7 @@
 ## mount-ebs
 
 ![GitHub tag](https://img.shields.io/github/tag/monder/mount-ebs.svg?style=flat-square)
+[![Build Status](https://img.shields.io/travis/monder/mount-ebs.svg?style=flat-square)](https://travis-ci.org/monder/mount-ebs)
 
 A helper utility initially created for `rkt` to mount `EBS` volumes.
 
