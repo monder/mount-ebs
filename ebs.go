@@ -132,12 +132,18 @@ func attachVolume(id string) (string, error) {
 		return "", err
 	}
 
-	for tries := 0; tries < 3; tries++ {
+	for tries := 0; tries < 25; tries++ {
 		device, err = getFreeDeviceName(tries)
 		if err != nil {
 			return "", err
 		}
 		fmt.Fprintf(os.Stderr, "using device %s\n", device)
+
+		err = detachVolume(id)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s\n", err)
+			//TODO not attached return "", err
+		}
 
 		_, err = ec2.AttachVolume(&awsEC2.AttachVolumeInput{
 			Device:     aws.String(device),
@@ -151,7 +157,7 @@ func attachVolume(id string) (string, error) {
 
 		fmt.Fprintf(os.Stderr, "waiting for volume to attach...\n")
 
-		for tries := 0; tries < 15; tries++ {
+		for tries := 0; tries < 3; tries++ {
 			device, err = getAttachedVolumeDevice(id)
 			if err == nil {
 				return device, nil
@@ -208,6 +214,7 @@ func isMounted(mountpoint string) (bool, error) {
 
 func detachVolume(id string) error {
 	//TODO check if already detached
+	// status == available
 	fmt.Fprintf(os.Stderr, "detaching volume %s...\n", id)
 	ec2, instanceId, err := getInstance()
 	if err != nil {
@@ -243,6 +250,11 @@ func unmountVolume(mountpoint string) error {
 		fmt.Fprintf(os.Stderr, "path %s is not mounted\n", mountpoint)
 		return nil
 	}
+
+	if err := exec.Command("lsof", mountpoint).Run(); err == nil {
+		return fmt.Errorf("mountpoint %s is in use", mountpoint)
+	}
+
 	if err := syscall.Unmount(mountpoint, 0); err != nil {
 		return err
 	}
