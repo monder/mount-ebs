@@ -20,6 +20,6 @@ $ mount-ebs -u vol-89f4dc0e
 
 ### behavior
 
-Mount command will try to attach and mount volume. It will only mount if the volume is already attached. It tries to attach to the first available device `/dev/sd[a-p]` and will keep retrying until it succeeds or there will be no working device names left.
+Mount command will try to attach and mount volume. If the volume is already attached, tt will mount it. It tries to attach to the first available device `/dev/sd[f-p]` and will keep retrying until it succeeds or there will be no valid device names left on the host.
 
-Unmount will try to unmount and detach volume. If the mountpoint is in use the operation is a noop. It is usefol for situations when multiple resources want to use the volume.
+Unmount will try to unmount and detach volume. If the mountpoint is in use, the operation is a noop. It is useful for situations when multiple resources want to use the same volume.
