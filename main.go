@@ -8,6 +8,7 @@ import (
 
 func main() {
 	unmount := flag.Bool("u", false, "unmount")
+	format := flag.String("f", "", "format")
 	flag.Parse()
 
 	volumeId := flag.Arg(0)
@@ -19,7 +20,7 @@ func main() {
 	if *unmount {
 		UnmountVolume(volumeId)
 	} else {
-		mountpoint, err := MountVolume(volumeId)
+		mountpoint, err := MountVolume(volumeId, *format)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%s\n", err)
 			os.Exit(2)

@@ -15,7 +15,7 @@ import (
 	awsEC2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
-func MountVolume(id string) (string, error) {
+func MountVolume(id string, format string) (string, error) {
 	mountpoint := mountpointForId(id)
 	fmt.Fprintf(os.Stderr, "mount volume %s to %s\n", id, mountpoint)
 
@@ -26,9 +26,17 @@ func MountVolume(id string) (string, error) {
 
 	err = mountVolume(device, mountpointForId(id))
 	if err != nil {
-		// Make sure to detach the volume
-		detachVolume(id)
-		return "", err
+		if format != "" {
+			if out, err := exec.Command("mkfs", "-t", format, device).CombinedOutput(); err != nil {
+				fmt.Fprintf(os.Stderr, "formatting device %s to %s failed: %v\n%v", device, format, err, string(out))
+			}
+			err = mountVolume(device, mountpointForId(id))
+		}
+		if err != nil {
+			// Make sure to detach the volume
+			detachVolume(id)
+			return "", err
+		}
 	}
 
 	return mountpoint, nil
@@ -91,6 +99,9 @@ func getFreeDeviceName(skip int) (string, error) {
 
 func getAttachedVolumeDevice(id string) (string, error) {
 	ec2, instanceId, err := getInstance()
+	if err != nil {
+		return "", err
+	}
 	info, err := ec2.DescribeVolumes(&awsEC2.DescribeVolumesInput{
 		VolumeIds: []*string{aws.String(id)},
 	})
