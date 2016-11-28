@@ -43,19 +43,19 @@ func MountVolume(id string, format string) (string, error) {
 
 }
 
-func UnmountVolume(id string) {
+func UnmountVolume(id string) error {
 	fmt.Fprintf(os.Stderr, "unmount volume %s\n", id)
 
 	err := unmountVolume(mountpointForId(id))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		return
+		return err
 	}
 
 	err = detachVolume(id)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
+		return err
 	}
+	return nil
 }
 
 // Private

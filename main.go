@@ -18,7 +18,11 @@ func main() {
 	}
 
 	if *unmount {
-		UnmountVolume(volumeId)
+		err := UnmountVolume(volumeId)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s\n", err)
+			os.Exit(2)
+		}
 	} else {
 		mountpoint, err := MountVolume(volumeId, *format)
 		if err != nil {
@@ -27,4 +31,5 @@ func main() {
 		}
 		fmt.Println(mountpoint)
 	}
+	os.Exit(0)
 }
